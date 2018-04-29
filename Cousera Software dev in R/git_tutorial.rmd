@@ -1,0 +1,339 @@
+---
+title: "Introducing Git"
+author: "Florian Sittel"
+date: "9 April 2018"
+output: 
+  html_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Introduction
+
+Git is a popular and widespread version control system for text files.
+Initially, it was developed by Linus Torvalds (the founder of Linux) to handle
+the development of the Linux kernel code.
+Nowadays, Git has become a de-facto standard among many programmers to
+
+  * store their source code
+  * use automatic versioning of their files
+  * work together on the same source code
+  * ...
+
+The most popular features of Git include versioning, diffs, branching,
+synchronization, and powerfull code merging capabilities.
+
+Typically, Git is used as a command line tool, however, graphical user
+interfaces (e.g. [TortoiseGit](https://tortoisegit.org/) for the Windows platform) exist.
+
+### Installation (Windows)
+
+Go to https://git-scm.com/downloads and select the Windows platform.
+If you have administrator rights (e.g. an 'inst-account'), you can select
+the "Git for Windows Setup" version and install Git globally on the system.
+
+If you do not have administrator rights, select the "Git for Windows Portable"
+version. This allows you to install Git locally in your personal user
+directory.
+
+In any case, you probably want to choose the 64-bit version.
+
+Download the setup.exe files and follow the instructions.
+
+Run the newly install 'git-bash.exe' program to get a text terminal in which
+use can use Git. Use the standard (Linux/Unix) commands to change directories,
+view directory contents, etc.
+If you are not familiar with basic Linux commands, check 
+https://maker.pro/education/basic-linux-commands-for-beginners for a
+comprehensive introduction.
+
+
+### Basic setup
+
+Before getting into business, you have to tell Git your identity.
+This way, everyone of your committed changes can be logged with your identity
+to document the actions of the development team.
+To store your name and email, run
+
+```bash
+$ git config --global user.name "John Doe"
+$ git config --global user.email john.doe@basf.com
+```
+
+This needs to be done only once.
+
+
+## Getting started
+
+### Creating repositories
+
+To get started with Git, you first need to create a repository.
+You can create one locally by running
+
+```bash
+$ git init
+```
+
+in a designated directory.
+This will create a (hidden) subdirectory called '.git' and the main directory
+will from now on act as your Git repository.
+However, if you are working with Bitbucket (a platform which hosts Git
+repositories), e.g. as part of the RCN battery
+research team, it is easier to create a new repository in the Bitbucket
+interface and 'cloning' the repository using
+
+```bash
+$ git clone https://YOUR_USERNAME@bitbucket.basf.net/scm/PROJECT/GIT_REPO.git
+```
+
+Here, we use the https-version of the Git URL instead of the (preselected)
+ssh-version.
+This way, you do not have to create and handle ssh keys, but can savely interact
+with Bitbucket via smartcard authentication.
+Note that https is not the default setting!
+
+
+![](clone_http_path.png)
+
+
+
+## Basic functions
+
+Basically, Git is a distributed version control system.
+In contrast to other systems like CVS or SVN, you do not connect to a
+central server to save your work, but check in your changes locally on your
+personal filesystem.
+Thus, every team member has his/her personal copy of the full repository.
+The advantage of such an approach is that you can check in your work or review
+older versions indepently from other team members and from the server
+infrastructure.
+Exchange of work, however, is typically done against a central server by syncing
+your personal repository against the group repository.
+Yet, the group repository is not really special, in principle you can directly
+sync between team member's repositories in a peer-to-peer manner.
+
+
+### add, commit, remove
+Once you created (or cloned) a repository in your directory designated for your
+project work, you can work with Git.
+In principle, Git only knows about files which you explicitly check in to the
+repository.
+Any file which is not checked in (or 'added') will not be put under version
+control or synced with other repositories.
+Assuming you have created several files in your directory
+
+```bash
+$ ls
+file1 file2 file3
+```
+
+you can check their status (i.e. whether they are checked into Git and/or have
+been modified) by running
+
+```bash
+$ git status
+On branch master
+
+No commits yet
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        file1
+        file2
+        file3
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+
+Here, you see that all three files are actually untracked by Git.
+To add a file to version control, run
+
+```bash
+$ git add file1
+
+```
+
+Like most of the other commands which change the status of the repository, you
+did not actually change the repository itself, but only staged the file to being
+added, as you can see by again running
+
+```bash
+$ git status
+On branch master
+
+No commits yet
+
+Changes to be committed:
+  (use "git rm --cached <file>..." to unstage)
+
+        new file:   file1
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        file2
+        file3
+```
+
+To actually commit your changes, run
+
+```bash
+$ git commit -m "adding the first file"
+[master (root-commit) 6da0165] adding the first file
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 file1
+
+```
+
+Use the '-m' option to add a log message to your commit.
+Now, all staged changes --in this case adding 'file1'-- have been committed to
+the repository.
+To review all your changes, use
+
+```bash
+$ git log
+commit 6da01654ade039a24ec8057a22529e7101c5e5c2 (HEAD -> master)
+Author: Florian Sittel <florian.sittel@basf.com>
+Date:   Fri Apr 13 12:58:14 2018 +0200
+
+    adding the first file
+
+```
+
+Reviewing the current status of the repository, we realize that we forgot to
+add the other two files, which we are going to do next:
+
+```bash
+$ git add file2 file3
+
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   file2
+        new file:   file3
+
+$ git commit -m "add the other files"
+[master 272d477] add the other files
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 file2
+ create mode 100644 file3
+
+```
+
+Now, the log shows
+
+```bash
+$ git log
+commit 272d47733991162e7ed64f5b1e11275f28d81a2c (HEAD -> master)
+Author: Florian Sittel <florian.sittel@basf.com>
+Date:   Fri Apr 13 13:05:31 2018 +0200
+
+    add the other files
+
+commit 6da01654ade039a24ec8057a22529e7101c5e5c2
+Author: Florian Sittel <florian.sittel@basf.com>
+Date:   Fri Apr 13 12:58:14 2018 +0200
+
+    adding the first file
+
+```
+
+Obviously, your log tracks all your (or your colleagues') changes of the
+repository, including version number (the long hexadecimal code), auther,
+timestamp, and log message.
+
+
+
+## Working together
+
+Typically, you will not work alone, but share your code with colleagues, either
+separated by work package or time.
+To this end, you will use a central server which keeps a copy of the project's
+repository, in our case the Bitbucket service.
+As explained before, Git is a distributed system and your repository --and thus
+your commits-- are kept locally on your personal filesystem.
+Thus, to exchange code and committed changes, you have to sync with the central
+repository.
+
+### Push to / pull from central server
+Having set up your personal repository via cloning the original repository from
+Bitbucket, syncing is particularly easy.
+All information about the original server is already stored in your repository's
+configuration, thus you can simply run the commands
+
+```bash
+$ git push
+```
+
+(or the following to initially set the correct branch, more about that later)
+
+```bash
+$ git push
+fatal: The current branch master has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin master
+
+```
+
+to push your local changes to the original (aka 'remote') repository, or
+
+```bash
+$ git pull
+```
+
+to pull the changes of others from the central repository into your personal
+copy.
+
+
+
+### Conflicts
+Of course, it will happen that people work on the same files, and sometimes even
+on the same parts of the source code.
+In these cases, conflicts will emerge which Git sometimes is able to manage
+automatically, sometimes, however, it is necessary to tell Git what to do.
+
+Imagine somebody else checked out the above repository and changed the content
+of file1, which was empty before.
+
+At the same time, you have yourself begun to write some text in file1, which
+is different from what your colleague has written.
+Both of you committed your changes to your local repositories, your colleague,
+however was faster than you in pushing his changes to the central server.
+When you now run
+
+```bash
+$ git commit -am "created content for file1"
+warning: LF will be replaced by CRLF in file1.
+The file will have its original line endings in your working directory.
+[master 56450ef] created content for file1
+ 1 file changed, 1 insertion(+)
+
+
+$ git push --set-upstream origin master
+To C:/Users/sittelf/devel/git_test_bare
+ ! [rejected]        master -> master (fetch first)
+error: failed to push some refs to 'C:/Users/sittelf/devel/git_test_bare'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+```
+
+You get an error message that your changes have been rejected by the central
+repository ('remote').
+
+
+
+### Branches, Merging
+
+
